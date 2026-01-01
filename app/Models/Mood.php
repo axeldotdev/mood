@@ -33,6 +33,7 @@ final class Mood extends Model
     {
         return [
             'types' => AsEnumArrayObject::of(MoodType::class),
+            'comment' => 'encrypted',
         ];
     }
 }

@@ -46,7 +46,7 @@ test('pending mood is saved after user logs in', function (): void {
         ->set('email', $user->email)
         ->set('password', 'password')
         ->call('login')
-        ->assertRedirect(route('home'));
+        ->assertRedirect(route('dashboard'));
 
     expect(session('pending_mood'))->toBeNull();
     expect($user->fresh()->moods)->toHaveCount(1);
@@ -66,7 +66,7 @@ test('pending mood is saved after user registers', function (): void {
         ->set('password', 'Xk9$mP2vL@nQ7wR!')
         ->set('password_confirmation', 'Xk9$mP2vL@nQ7wR!')
         ->call('register')
-        ->assertRedirect(route('home'));
+        ->assertRedirect(route('dashboard'));
 
     $user = User::where('email', 'newuser@example.com')->first();
     expect(session('pending_mood'))->toBeNull();
@@ -82,7 +82,7 @@ test('no mood is saved if there is no pending mood in session', function (): voi
         ->set('email', $user->email)
         ->set('password', 'password')
         ->call('login')
-        ->assertRedirect(route('home'));
+        ->assertRedirect(route('dashboard'));
 
     expect($user->fresh()->moods)->toHaveCount(0);
 });
@@ -103,7 +103,7 @@ test('pending mood is not saved if user already has a mood today', function (): 
         ->set('email', $user->email)
         ->set('password', 'password')
         ->call('login')
-        ->assertRedirect(route('home'));
+        ->assertRedirect(route('dashboard'));
 
     expect(session('pending_mood'))->toBeNull();
     expect($user->fresh()->moods)->toHaveCount(1);

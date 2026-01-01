@@ -13,7 +13,7 @@
 
             @auth
                 <flux:navbar class="-mb-px max-lg:hidden">
-                    <flux:navbar.item icon="calendar" :href="route('home')" wire:navigate>
+                    <flux:navbar.item icon="calendar" :href="route('dashboard')" wire:navigate>
                         {{ __('Today') }}
                     </flux:navbar.item>
 

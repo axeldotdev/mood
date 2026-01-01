@@ -11,6 +11,8 @@ final class Logout
 {
     /**
      * Log the current user out of the application.
+     *
+     * @phpstan-ignore return.unusedType (Livewire overrides redirect() at runtime)
      */
     public function __invoke(): \Illuminate\Http\RedirectResponse|\Livewire\Features\SupportRedirects\Redirector
     {

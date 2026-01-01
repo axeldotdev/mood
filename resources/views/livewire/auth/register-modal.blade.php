@@ -38,7 +38,7 @@ new class() extends Component
 
         $savePendingMood->execute($user);
 
-        $this->redirect(route('home'), navigate: true);
+        $this->redirect(route('dashboard'), navigate: true);
     }
 };
 

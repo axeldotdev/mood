@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 use App\Enums\MoodType;
 
-it('returns positive category for positive moods', function (MoodType $mood): void {
-    expect($mood->category())->toBe('positive');
+it('returns pleasant category for pleasant moods', function (MoodType $mood): void {
+    expect($mood->category())->toBe('pleasant');
 })->with([
     'Enriching' => MoodType::Enriching,
     'Good' => MoodType::Good,
@@ -16,8 +16,8 @@ it('returns positive category for positive moods', function (MoodType $mood): vo
     'Stimulating' => MoodType::Stimulating,
 ]);
 
-it('returns negative category for negative moods', function (MoodType $mood): void {
-    expect($mood->category())->toBe('negative');
+it('returns unpleasant category for unpleasant moods', function (MoodType $mood): void {
+    expect($mood->category())->toBe('unpleasant');
 })->with([
     'Complicated' => MoodType::Complicated,
     'Disappointing' => MoodType::Disappointing,

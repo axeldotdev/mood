@@ -19,7 +19,7 @@ test('users can authenticate using the login screen', function (): void {
 
     $response
         ->assertSessionHasNoErrors()
-        ->assertRedirect(route('home', absolute: false));
+        ->assertRedirect(route('dashboard', absolute: false));
 
     $this->assertAuthenticated();
 });

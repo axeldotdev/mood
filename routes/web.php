@@ -7,6 +7,7 @@ use Livewire\Volt\Volt;
 Volt::route('/', 'home')->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function (): void {
+    Volt::route('dashboard', 'dashboard')->name('dashboard');
     Volt::route('your-year', 'your-year')->name('your-year');
 });
 

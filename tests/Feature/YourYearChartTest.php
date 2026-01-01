@@ -1,0 +1,274 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Enums\MoodType;
+use App\Models\Mood;
+use App\Models\User;
+use Livewire\Volt\Volt;
+
+test('guests are redirected to login', function (): void {
+    $this->get(route('your-year'))
+        ->assertRedirect(route('login'));
+});
+
+test('authenticated users can visit your year page', function (): void {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->get(route('your-year'))
+        ->assertSuccessful();
+});
+
+test('chart data returns 12 months with zero counts when no moods exist', function (): void {
+    $user = User::factory()->create();
+
+    $component = Volt::actingAs($user)->test('your-year');
+
+    $chartData = $component->get('chartData');
+
+    expect($chartData)->toHaveCount(12);
+    expect($chartData[0])->toMatchArray(['month' => 'Jan', 'positive' => 0, 'negative' => 0]);
+    expect($chartData[11])->toMatchArray(['month' => 'Dec', 'positive' => 0, 'negative' => 0]);
+});
+
+test('chart data counts positive mood types correctly', function (): void {
+    $user = User::factory()->create();
+
+    Mood::factory()->for($user)->create([
+        'types' => [MoodType::Good, MoodType::Joyful],
+        'created_at' => now()->startOfYear(),
+    ]);
+
+    $component = Volt::actingAs($user)->test('your-year');
+    $chartData = $component->get('chartData');
+
+    expect($chartData[0]['positive'])->toBe(2);
+    expect($chartData[0]['negative'])->toBe(0);
+});
+
+test('chart data counts negative mood types correctly', function (): void {
+    $user = User::factory()->create();
+
+    Mood::factory()->for($user)->create([
+        'types' => [MoodType::Sad, MoodType::Stressful],
+        'created_at' => now()->startOfYear(),
+    ]);
+
+    $component = Volt::actingAs($user)->test('your-year');
+    $chartData = $component->get('chartData');
+
+    expect($chartData[0]['positive'])->toBe(0);
+    expect($chartData[0]['negative'])->toBe(2);
+});
+
+test('chart data counts mixed mood types correctly', function (): void {
+    $user = User::factory()->create();
+
+    Mood::factory()->for($user)->create([
+        'types' => [MoodType::Good, MoodType::Stressful],
+        'created_at' => now()->startOfYear(),
+    ]);
+
+    $component = Volt::actingAs($user)->test('your-year');
+    $chartData = $component->get('chartData');
+
+    expect($chartData[0]['positive'])->toBe(1);
+    expect($chartData[0]['negative'])->toBe(1);
+});
+
+test('chart data groups moods by month', function (): void {
+    $user = User::factory()->create();
+
+    Mood::factory()->for($user)->create([
+        'types' => [MoodType::Good],
+        'created_at' => now()->setMonth(3)->setDay(15),
+    ]);
+
+    Mood::factory()->for($user)->create([
+        'types' => [MoodType::Sad],
+        'created_at' => now()->setMonth(7)->setDay(10),
+    ]);
+
+    $component = Volt::actingAs($user)->test('your-year');
+    $chartData = $component->get('chartData');
+
+    expect($chartData[2])->toMatchArray(['month' => 'Mar', 'positive' => 1, 'negative' => 0]);
+    expect($chartData[6])->toMatchArray(['month' => 'Jul', 'positive' => 0, 'negative' => 1]);
+});
+
+test('chart data only includes current year moods', function (): void {
+    $user = User::factory()->create();
+
+    Mood::factory()->for($user)->create([
+        'types' => [MoodType::Good],
+        'created_at' => now()->subYear(),
+    ]);
+
+    Mood::factory()->for($user)->create([
+        'types' => [MoodType::Great],
+        'created_at' => now(),
+    ]);
+
+    $component = Volt::actingAs($user)->test('your-year');
+    $chartData = $component->get('chartData');
+
+    $totalPositive = collect($chartData)->sum('positive');
+    $totalNegative = collect($chartData)->sum('negative');
+
+    expect($totalPositive)->toBe(1);
+    expect($totalNegative)->toBe(0);
+});
+
+test('chart data only includes authenticated user moods', function (): void {
+    $user = User::factory()->create();
+    $otherUser = User::factory()->create();
+
+    Mood::factory()->for($otherUser)->create([
+        'types' => [MoodType::Sad, MoodType::Stressful],
+        'created_at' => now(),
+    ]);
+
+    Mood::factory()->for($user)->create([
+        'types' => [MoodType::Good],
+        'created_at' => now(),
+    ]);
+
+    $component = Volt::actingAs($user)->test('your-year');
+    $chartData = $component->get('chartData');
+
+    $totalPositive = collect($chartData)->sum('positive');
+    $totalNegative = collect($chartData)->sum('negative');
+
+    expect($totalPositive)->toBe(1);
+    expect($totalNegative)->toBe(0);
+});
+
+test('month selector displays all 12 months', function (): void {
+    $user = User::factory()->create();
+
+    Volt::actingAs($user)
+        ->test('your-year')
+        ->assertSee('January')
+        ->assertSee('February')
+        ->assertSee('March')
+        ->assertSee('April')
+        ->assertSee('May')
+        ->assertSee('June')
+        ->assertSee('July')
+        ->assertSee('August')
+        ->assertSee('September')
+        ->assertSee('October')
+        ->assertSee('November')
+        ->assertSee('December');
+});
+
+test('x axis field is month when no month is selected', function (): void {
+    $user = User::factory()->create();
+
+    $component = Volt::actingAs($user)->test('your-year');
+
+    expect($component->get('xAxisField'))->toBe('month');
+});
+
+test('x axis field is day when a month is selected', function (): void {
+    $user = User::factory()->create();
+
+    $component = Volt::actingAs($user)
+        ->test('your-year')
+        ->set('selectedMonth', 3);
+
+    expect($component->get('xAxisField'))->toBe('day');
+});
+
+test('selecting a month shows daily data for that month', function (): void {
+    $user = User::factory()->create();
+
+    $component = Volt::actingAs($user)
+        ->test('your-year')
+        ->set('selectedMonth', 1);
+
+    $chartData = $component->get('chartData');
+
+    expect($chartData)->toHaveCount(31);
+    expect($chartData[0])->toHaveKeys(['day', 'positive', 'negative']);
+    expect($chartData[0]['day'])->toBe('1');
+    expect($chartData[30]['day'])->toBe('31');
+});
+
+test('february has correct number of days', function (): void {
+    $user = User::factory()->create();
+
+    $component = Volt::actingAs($user)
+        ->test('your-year')
+        ->set('selectedMonth', 2);
+
+    $chartData = $component->get('chartData');
+    $expectedDays = now()->setMonth(2)->daysInMonth;
+
+    expect($chartData)->toHaveCount($expectedDays);
+});
+
+test('daily chart data counts moods correctly', function (): void {
+    $user = User::factory()->create();
+
+    Mood::factory()->for($user)->create([
+        'types' => [MoodType::Good, MoodType::Joyful],
+        'created_at' => now()->setMonth(3)->setDay(15),
+    ]);
+
+    Mood::factory()->for($user)->create([
+        'types' => [MoodType::Sad],
+        'created_at' => now()->setMonth(3)->setDay(20),
+    ]);
+
+    $component = Volt::actingAs($user)
+        ->test('your-year')
+        ->set('selectedMonth', 3);
+
+    $chartData = $component->get('chartData');
+
+    expect($chartData[14])->toMatchArray(['day' => '15', 'positive' => 2, 'negative' => 0]);
+    expect($chartData[19])->toMatchArray(['day' => '20', 'positive' => 0, 'negative' => 1]);
+});
+
+test('daily chart data only includes moods from selected month', function (): void {
+    $user = User::factory()->create();
+
+    Mood::factory()->for($user)->create([
+        'types' => [MoodType::Good],
+        'created_at' => now()->setMonth(3)->setDay(10),
+    ]);
+
+    Mood::factory()->for($user)->create([
+        'types' => [MoodType::Sad],
+        'created_at' => now()->setMonth(5)->setDay(10),
+    ]);
+
+    $component = Volt::actingAs($user)
+        ->test('your-year')
+        ->set('selectedMonth', 3);
+
+    $chartData = $component->get('chartData');
+
+    $totalPositive = collect($chartData)->sum('positive');
+    $totalNegative = collect($chartData)->sum('negative');
+
+    expect($totalPositive)->toBe(1);
+    expect($totalNegative)->toBe(0);
+});
+
+test('clearing month selection returns to yearly view', function (): void {
+    $user = User::factory()->create();
+
+    $component = Volt::actingAs($user)
+        ->test('your-year')
+        ->set('selectedMonth', 3)
+        ->set('selectedMonth');
+
+    $chartData = $component->get('chartData');
+
+    expect($chartData)->toHaveCount(12);
+    expect($chartData[0])->toHaveKeys(['month', 'positive', 'negative']);
+    expect($component->get('xAxisField'))->toBe('month');
+});

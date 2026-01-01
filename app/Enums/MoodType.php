@@ -19,22 +19,27 @@ enum MoodType: string
     case Stimulating = 'stimulating';
     case Stressful = 'stressful';
 
-    public function label(): string
+    public function emoji(): string
     {
         return match ($this) {
-            self::Complicated => '🥵 ' . __('Complicated'),
-            self::Disappointing => '😕 ' . __('Disappointing'),
-            self::Enriching => '🙌 ' . __('Enriching'),
-            self::Frustrating => '😤 ' . __('Frustrating'),
-            self::Good => '👍 ' . __('Good'),
-            self::Great => '🎉 ' . __('Great'),
-            self::Joyful => '😄 ' . __('Joyful'),
-            self::Peaceful => '🧘 ' . __('Peaceful'),
-            self::Productive => '🔥 ' . __('Productive'),
-            self::Sad => '😢 ' . __('Sad'),
-            self::Stimulating => '✨ ' . __('Stimulating'),
-            self::Stressful => '⚡️ ' . __('Stressful'),
+            self::Complicated => '🥵',
+            self::Disappointing => '😕',
+            self::Enriching => '🙌',
+            self::Frustrating => '😤',
+            self::Good => '👍',
+            self::Great => '🎉',
+            self::Joyful => '😄',
+            self::Peaceful => '🧘',
+            self::Productive => '🔥',
+            self::Sad => '😢',
+            self::Stimulating => '✨',
+            self::Stressful => '⚡️',
         };
+    }
+
+    public function label(): string
+    {
+        return $this->emoji() . ' ' . __(ucfirst($this->value));
     }
 
     public function category(): string
@@ -53,5 +58,10 @@ enum MoodType: string
             self::Sad,
             self::Stressful => 'unpleasant',
         };
+    }
+
+    public function color(): string
+    {
+        return $this->category() === 'pleasant' ? 'sky' : 'amber';
     }
 }

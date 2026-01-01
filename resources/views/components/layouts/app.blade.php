@@ -5,7 +5,9 @@
     </head>
     <body class="min-h-screen bg-white dark:bg-zinc-800 font-mono antialiased">
         <flux:header container>
-            <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
+            @auth
+                <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
+            @endauth
 
             <a href="{{ route('home') }}" class="ms-2 me-5 flex items-center space-x-2 rtl:space-x-reverse lg:ms-0" wire:navigate>
                 <x-app-logo />
@@ -99,7 +101,7 @@
 
                 <flux:navlist variant="outline">
                     <flux:navlist.group :heading="__('Platform')">
-                        <flux:navlist.item icon="calendar" :href="route('home')" wire:navigate>
+                        <flux:navlist.item icon="calendar" :href="route('dashboard')" wire:navigate>
                             {{ __('Today') }}
                         </flux:navlist.item>
 
@@ -113,6 +115,12 @@
 
         <flux:main :container="true">
             {{ $slot }}
+
+            <footer class="mt-6">
+                <flux:text size="sm" class="text-center">
+                    &copy; Copyright {{ date('Y') }} Axel Charpentier. {{ __('All rights reserved') }}.
+                </flux:text>
+            </footer>
         </flux:main>
 
         @persist('toast')

@@ -40,6 +40,31 @@ new class() extends Component
     }
 
     /**
+     * @return array<int, array<int, array{types: \Illuminate\Database\Eloquent\Casts\ArrayObject<int, \App\Enums\MoodType>, comment: ?string}>>
+     */
+    #[Computed]
+    public function moodsByDate(): array
+    {
+        $moods = Auth::user()
+            ->moods()
+            ->whereYear('created_at', now()->year)
+            ->get();
+
+        $indexed = [];
+
+        foreach ($moods as $mood) {
+            $month = $mood->created_at->month;
+            $day = $mood->created_at->day;
+            $indexed[$month][$day] = [
+                'types' => $mood->types,
+                'comment' => $mood->comment,
+            ];
+        }
+
+        return $indexed;
+    }
+
+    /**
      * @return array<int, array{month: string, pleasant: int, unpleasant: int}>
      */
     private function getMonthlyChartData(): array
@@ -110,16 +135,16 @@ new class() extends Component
 
 ?>
 
-<div>
+<div class="space-y-6">
     <flux:card class="space-y-6">
         <div class="flex justify-between">
             <div>
                 <flux:heading>
-                    {{ __('Your moods this year') }}
+                    {{ __('Mood Trends') }}
                 </flux:heading>
 
                 <flux:text>
-                    {{ __('They are divided between pleasant and unpleasant moods') }}
+                    {{ __('See how your feelings evolved over time') }}
                 </flux:text>
             </div>
 
@@ -181,5 +206,67 @@ new class() extends Component
                 </flux:chart.legend>
             </div>
         </flux:chart>
+    </flux:card>
+
+    <flux:card class="space-y-6">
+        <div>
+            <flux:heading>
+                {{ __('Mood Calendar') }}
+            </flux:heading>
+
+            <flux:text>
+                {{ __('Every feeling, every day') }}
+            </flux:text>
+        </div>
+
+        <flux:table container:class="max-h-128">
+            <flux:table.columns sticky class="bg-white">
+                <flux:table.column sticky>
+                    {{ __('Day') }}
+                </flux:table.column>
+
+                @foreach (range(1, 12) as $m)
+                    <flux:table.column wire:key="'month-'.$m" :class="now()->month === $m ? 'text-sky-500!' : ''">
+                        {{ now()->setMonth($m)->format('F') }}
+                    </flux:table.column>
+                @endforeach
+            </flux:table.columns>
+
+            <flux:table.rows>
+                @foreach (range(1, 31) as $d)
+                    <flux:table.row>
+                        <flux:table.cell sticky class="bg-white">
+                            {{ $d }}
+                        </flux:table.cell>
+
+                        @foreach (range(1, 12) as $m)
+                            <flux:table.cell wire:key="'month-'.$m.'-day-'.$d">
+                                @if (isset($this->moodsByDate[$m][$d]))
+                                    <div class="flex flex-wrap gap-1">
+                                        @foreach ($this->moodsByDate[$m][$d]['types'] as $type)
+                                            <flux:tooltip :content="$type->label()">
+                                                <flux:badge size="sm" :color="$type->color()">
+                                                    {{ $type->emoji() }}
+                                                </flux:badge>
+                                            </flux:tooltip>
+                                        @endforeach
+
+                                        @if ($this->moodsByDate[$m][$d]['comment'])
+                                            <flux:tooltip :content="$this->moodsByDate[$m][$d]['comment']">
+                                                <flux:badge size="sm">
+                                                    <x-slot name="icon">
+                                                        <flux:icon.chat-bubble-bottom-center-text variant="micro"/>
+                                                    </x-slot>
+                                                </flux:badge>
+                                            </flux:tooltip>
+                                        @endif
+                                    </div>
+                                @endif
+                            </flux:table.cell>
+                        @endforeach
+                    </flux:table.row>
+                @endforeach
+            </flux:table.rows>
+        </flux:table>
     </flux:card>
 </div>

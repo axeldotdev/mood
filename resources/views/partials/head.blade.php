@@ -18,7 +18,6 @@
 <link href="https://fonts.bunny.net/css?family=fira-code:400,500,600,700" rel="stylesheet" />
 
 @vite(['resources/css/app.css', 'resources/js/app.js'])
-{{-- @fluxAppearance --}}
 
 @if (config('services.fathom.siteId'))
     <script src="https://cdn.usefathom.com/script.js" data-site="{{ config('services.fathom.siteId') }}" defer></script>

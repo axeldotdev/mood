@@ -105,7 +105,7 @@ new class() extends Component
             'pleasant' => $counts['pleasant'],
             'unpleasant' => $counts['unpleasant'],
         ])->values()->all();
-    }
+    }@
 };
 
 ?>

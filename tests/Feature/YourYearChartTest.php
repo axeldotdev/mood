@@ -272,3 +272,99 @@ test('clearing month selection returns to yearly view', function (): void {
     expect($chartData[0])->toHaveKeys(['month', 'pleasant', 'unpleasant']);
     expect($component->get('xAxisField'))->toBe('month');
 });
+
+test('default view mode is categorised', function (): void {
+    $user = User::factory()->create();
+
+    $component = Volt::actingAs($user)->test('your-year');
+
+    expect($component->get('viewMode'))->toBe('categorised');
+});
+
+test('switching to detailed view mode changes chart data structure', function (): void {
+    $user = User::factory()->create();
+
+    Mood::factory()->for($user)->create([
+        'types' => [MoodType::Good, MoodType::Sad],
+        'created_at' => now()->startOfYear(),
+    ]);
+
+    $component = Volt::actingAs($user)
+        ->test('your-year')
+        ->set('viewMode', 'detailed');
+
+    $chartData = $component->get('chartData');
+
+    expect($chartData)->toHaveCount(12);
+    expect($chartData[0])->toHaveKey('month');
+    expect($chartData[0])->toHaveKey('good');
+    expect($chartData[0])->toHaveKey('sad');
+    expect($chartData[0])->toHaveKey('joyful');
+    expect($chartData[0]['good'])->toBe(1);
+    expect($chartData[0]['sad'])->toBe(1);
+});
+
+test('detailed view mode includes all mood types with zero counts when no data', function (): void {
+    $user = User::factory()->create();
+
+    $component = Volt::actingAs($user)
+        ->test('your-year')
+        ->set('viewMode', 'detailed');
+
+    $chartData = $component->get('chartData');
+
+    foreach (MoodType::cases() as $type) {
+        expect($chartData[0])->toHaveKey($type->value);
+        expect($chartData[0][$type->value])->toBe(0);
+    }
+});
+
+test('detailed daily view returns correct data structure', function (): void {
+    $user = User::factory()->create();
+
+    Mood::factory()->for($user)->create([
+        'types' => [MoodType::Peaceful],
+        'created_at' => now()->setMonth(1)->setDay(5),
+    ]);
+
+    $component = Volt::actingAs($user)
+        ->test('your-year')
+        ->set('viewMode', 'detailed')
+        ->set('selectedMonth', 1);
+
+    $chartData = $component->get('chartData');
+
+    expect($chartData)->toHaveCount(31);
+    expect($chartData[4])->toHaveKey('day');
+    expect($chartData[4]['day'])->toBe('5');
+    expect($chartData[4]['peaceful'])->toBe(1);
+});
+
+test('moodTypesWithData returns correct values for detailed mode', function (): void {
+    $user = User::factory()->create();
+
+    Mood::factory()->for($user)->create([
+        'types' => [MoodType::Good, MoodType::Sad],
+        'created_at' => now()->startOfYear(),
+    ]);
+
+    $component = Volt::actingAs($user)
+        ->test('your-year')
+        ->set('viewMode', 'detailed');
+
+    $moodTypesWithData = $component->get('moodTypesWithData');
+
+    expect($moodTypesWithData['good'])->toBeTrue();
+    expect($moodTypesWithData['sad'])->toBeTrue();
+    expect($moodTypesWithData['joyful'])->toBeFalse();
+    expect($moodTypesWithData['peaceful'])->toBeFalse();
+});
+
+test('view mode selector is displayed', function (): void {
+    $user = User::factory()->create();
+
+    Volt::actingAs($user)
+        ->test('your-year')
+        ->assertSee('Categorised')
+        ->assertSee('Detailed');
+});

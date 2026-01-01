@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\MoodType;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Volt\Component;
@@ -8,17 +9,20 @@ new class() extends Component
 {
     public ?int $selectedMonth = null;
 
-    /**
-     * @return array<int, array{month: string, pleasant: int, unpleasant: int}|array{day: string, pleasant: int, unpleasant: int}>
-     */
+    public string $viewMode = 'categorised';
+
     #[Computed]
     public function chartData(): array
     {
-        if ($this->selectedMonth !== null) {
-            return $this->getDailyChartData();
+        if ($this->viewMode === 'detailed') {
+            return $this->selectedMonth !== null
+                ? $this->getDetailedDailyChartData()
+                : $this->getDetailedMonthlyChartData();
         }
 
-        return $this->getMonthlyChartData();
+        return $this->selectedMonth !== null
+            ? $this->getDailyChartData()
+            : $this->getMonthlyChartData();
     }
 
     #[Computed]
@@ -62,6 +66,21 @@ new class() extends Component
         }
 
         return $indexed;
+    }
+
+    /**
+     * @return array<string, bool>
+     */
+    #[Computed]
+    public function moodTypesWithData(): array
+    {
+        $result = [];
+
+        foreach (MoodType::cases() as $type) {
+            $result[$type->value] = collect($this->chartData)->sum($type->value) > 0;
+        }
+
+        return $result;
     }
 
     /**
@@ -131,6 +150,78 @@ new class() extends Component
             'unpleasant' => $counts['unpleasant'],
         ])->values()->all();
     }
+
+    /**
+     * @return array<int, array<string, int|string>>
+     */
+    private function getDetailedMonthlyChartData(): array
+    {
+        $months = [];
+
+        foreach (range(1, 12) as $month) {
+            $months[$month] = collect(MoodType::cases())
+                ->mapWithKeys(fn (MoodType $type): array => [$type->value => 0])
+                ->all();
+        }
+
+        $moods = Auth::user()
+            ->moods()
+            ->whereYear('created_at', now()->year)
+            ->get();
+
+        foreach ($moods as $mood) {
+            $month = $mood->created_at->month;
+
+            foreach ($mood->types as $type) {
+                $months[$month][$type->value]++;
+            }
+        }
+
+        return collect($months)->map(function (array $counts, int $month): array {
+            return array_merge(
+                ['month' => now()->setMonth($month)->format('M')],
+                $counts
+            );
+        })->values()->all();
+    }
+
+    /**
+     * @return array<int, array<string, int|string>>
+     */
+    private function getDetailedDailyChartData(): array
+    {
+        $year = now()->year;
+        $daysInMonth = now()->setYear($year)->setMonth($this->selectedMonth)->daysInMonth;
+
+        $days = [];
+
+        foreach (range(1, $daysInMonth) as $day) {
+            $days[$day] = collect(MoodType::cases())
+                ->mapWithKeys(fn (MoodType $type): array => [$type->value => 0])
+                ->all();
+        }
+
+        $moods = Auth::user()
+            ->moods()
+            ->whereYear('created_at', $year)
+            ->whereMonth('created_at', $this->selectedMonth)
+            ->get();
+
+        foreach ($moods as $mood) {
+            $day = $mood->created_at->day;
+
+            foreach ($mood->types as $type) {
+                $days[$day][$type->value]++;
+            }
+        }
+
+        return collect($days)->map(function (array $counts, int $day): array {
+            return array_merge(
+                ['day' => (string) $day],
+                $counts
+            );
+        })->values()->all();
+    }
 };
 
 ?>
@@ -148,7 +239,17 @@ new class() extends Component
                 </flux:text>
             </div>
 
-            <div>
+            <div class="flex gap-2">
+                <flux:select wire:model.live="viewMode" variant="listbox" size="sm">
+                    <flux:select.option value="categorised">
+                        {{ __('Categorised') }}
+                    </flux:select.option>
+
+                    <flux:select.option value="detailed">
+                        {{ __('Detailed') }}
+                    </flux:select.option>
+                </flux:select>
+
                 <flux:select wire:model.live="selectedMonth" placeholder="{{ __('All year') }}" clearable variant="listbox" size="sm">
                     @foreach (range(1, 12) as $m)
                         <flux:select.option value="{{ $m }}">
@@ -159,17 +260,26 @@ new class() extends Component
             </div>
         </div>
 
-        <flux:chart wire:key="chart-{{ $selectedMonth ?? 'year' }}" :value="$this->chartData">
+        <flux:chart wire:key="chart-{{ $viewMode }}-{{ $selectedMonth ?? 'year' }}" :value="$this->chartData">
             <flux:chart.viewport class="aspect-3/1">
                 <flux:chart.svg>
-                    @if ($this->hasPleasantData)
-                        <flux:chart.line field="pleasant" class="text-sky-500 dark:text-sky-400" />
-                        <flux:chart.point field="pleasant" class="text-sky-500 dark:text-sky-400" />
-                    @endif
+                    @if ($viewMode === 'categorised')
+                        @if ($this->hasPleasantData)
+                            <flux:chart.line field="pleasant" class="text-sky-500 dark:text-sky-400" />
+                            <flux:chart.point field="pleasant" class="text-sky-500 dark:text-sky-400" />
+                        @endif
 
-                    @if ($this->hasUnpleasantData)
-                        <flux:chart.line field="unpleasant" class="text-amber-500 dark:text-amber-400" />
-                        <flux:chart.point field="unpleasant" class="text-amber-500 dark:text-amber-400" />
+                        @if ($this->hasUnpleasantData)
+                            <flux:chart.line field="unpleasant" class="text-amber-500 dark:text-amber-400" />
+                            <flux:chart.point field="unpleasant" class="text-amber-500 dark:text-amber-400" />
+                        @endif
+                    @else
+                        @foreach (App\Enums\MoodType::cases() as $type)
+                            @if ($this->moodTypesWithData[$type->value])
+                                <flux:chart.line :field="$type->value" :class="$type->chartColor()" />
+                                <flux:chart.point :field="$type->value" :class="$type->chartColor()" />
+                            @endif
+                        @endforeach
                     @endif
 
                     <flux:chart.axis axis="x" :field="$this->xAxisField">
@@ -186,24 +296,42 @@ new class() extends Component
                 <flux:chart.tooltip>
                     <flux:chart.tooltip.heading :field="$this->xAxisField" />
 
-                    @if ($this->hasPleasantData)
-                        <flux:chart.tooltip.value field="pleasant" label="Pleasant" />
-                    @endif
+                    @if ($viewMode === 'categorised')
+                        @if ($this->hasPleasantData)
+                            <flux:chart.tooltip.value field="pleasant" label="{{ __('Pleasant') }}" />
+                        @endif
 
-                    @if ($this->hasUnpleasantData)
-                        <flux:chart.tooltip.value field="unpleasant" label="Unpleasant" />
+                        @if ($this->hasUnpleasantData)
+                            <flux:chart.tooltip.value field="unpleasant" label="{{ __('Unpleasant') }}" />
+                        @endif
+                    @else
+                        @foreach (App\Enums\MoodType::cases() as $type)
+                            @if ($this->moodTypesWithData[$type->value])
+                                <flux:chart.tooltip.value :field="$type->value" :label="$type->label()" />
+                            @endif
+                        @endforeach
                     @endif
                 </flux:chart.tooltip>
             </flux:chart.viewport>
 
-            <div class="flex justify-center gap-4 pt-4">
-                <flux:chart.legend label="Pleasant">
-                    <flux:chart.legend.indicator class="bg-sky-500" />
-                </flux:chart.legend>
+            <div class="flex flex-wrap justify-center gap-4 pt-4">
+                @if ($viewMode === 'categorised')
+                    <flux:chart.legend label="{{ __('Pleasant') }}">
+                        <flux:chart.legend.indicator class="bg-sky-500" />
+                    </flux:chart.legend>
 
-                <flux:chart.legend label="Unpleasant">
-                    <flux:chart.legend.indicator class="bg-amber-500" />
-                </flux:chart.legend>
+                    <flux:chart.legend label="{{ __('Unpleasant') }}">
+                        <flux:chart.legend.indicator class="bg-amber-500" />
+                    </flux:chart.legend>
+                @else
+                    @foreach (App\Enums\MoodType::cases() as $type)
+                        @if ($this->moodTypesWithData[$type->value])
+                            <flux:chart.legend :label="$type->label()">
+                                <flux:chart.legend.indicator :class="$type->chartLegendColor()" />
+                            </flux:chart.legend>
+                        @endif
+                    @endforeach
+                @endif
             </div>
         </flux:chart>
     </flux:card>
@@ -245,7 +373,7 @@ new class() extends Component
                                     <div class="flex flex-wrap gap-1">
                                         @foreach ($this->moodsByDate[$m][$d]['types'] as $type)
                                             <flux:tooltip :content="$type->label()">
-                                                <flux:badge size="sm" :color="$type->color()">
+                                                <flux:badge size="sm" :color="$type->badgeColor()">
                                                     {{ $type->emoji() }}
                                                 </flux:badge>
                                             </flux:tooltip>

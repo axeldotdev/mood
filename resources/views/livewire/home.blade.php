@@ -21,7 +21,7 @@
         <div class="content-center">
             <div class="flex flex-wrap justify-center items-center gap-2">
                 @foreach (\App\Enums\MoodType::cases() as $mood)
-                    <flux:badge :color="$mood->color()">
+                    <flux:badge :color="$mood->badgeColor()">
                         {{ $mood->label() }}
                     </flux:badge>
                 @endforeach

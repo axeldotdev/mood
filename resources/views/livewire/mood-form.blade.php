@@ -98,7 +98,7 @@ new class() extends Component
             </div>
 
             @if ($this->todaysMood->comment)
-                <flux:text class="mt-4 text-center italic">
+                <flux:text class="mt-4 text-center italic max-w-3xl mx-auto">
                     "{{ $this->todaysMood->comment }}"
                 </flux:text>
             @endif

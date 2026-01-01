@@ -28,11 +28,11 @@ test('chart data returns 12 months with zero counts when no moods exist', functi
     $chartData = $component->get('chartData');
 
     expect($chartData)->toHaveCount(12);
-    expect($chartData[0])->toMatchArray(['month' => 'Jan', 'positive' => 0, 'negative' => 0]);
-    expect($chartData[11])->toMatchArray(['month' => 'Dec', 'positive' => 0, 'negative' => 0]);
+    expect($chartData[0])->toMatchArray(['month' => 'Jan', 'pleasant' => 0, 'unpleasant' => 0]);
+    expect($chartData[11])->toMatchArray(['month' => 'Dec', 'pleasant' => 0, 'unpleasant' => 0]);
 });
 
-test('chart data counts positive mood types correctly', function (): void {
+test('chart data counts pleasant mood types correctly', function (): void {
     $user = User::factory()->create();
 
     Mood::factory()->for($user)->create([
@@ -43,11 +43,11 @@ test('chart data counts positive mood types correctly', function (): void {
     $component = Volt::actingAs($user)->test('your-year');
     $chartData = $component->get('chartData');
 
-    expect($chartData[0]['positive'])->toBe(2);
-    expect($chartData[0]['negative'])->toBe(0);
+    expect($chartData[0]['pleasant'])->toBe(2);
+    expect($chartData[0]['unpleasant'])->toBe(0);
 });
 
-test('chart data counts negative mood types correctly', function (): void {
+test('chart data counts unpleasant mood types correctly', function (): void {
     $user = User::factory()->create();
 
     Mood::factory()->for($user)->create([
@@ -58,8 +58,8 @@ test('chart data counts negative mood types correctly', function (): void {
     $component = Volt::actingAs($user)->test('your-year');
     $chartData = $component->get('chartData');
 
-    expect($chartData[0]['positive'])->toBe(0);
-    expect($chartData[0]['negative'])->toBe(2);
+    expect($chartData[0]['pleasant'])->toBe(0);
+    expect($chartData[0]['unpleasant'])->toBe(2);
 });
 
 test('chart data counts mixed mood types correctly', function (): void {
@@ -73,8 +73,8 @@ test('chart data counts mixed mood types correctly', function (): void {
     $component = Volt::actingAs($user)->test('your-year');
     $chartData = $component->get('chartData');
 
-    expect($chartData[0]['positive'])->toBe(1);
-    expect($chartData[0]['negative'])->toBe(1);
+    expect($chartData[0]['pleasant'])->toBe(1);
+    expect($chartData[0]['unpleasant'])->toBe(1);
 });
 
 test('chart data groups moods by month', function (): void {
@@ -93,8 +93,8 @@ test('chart data groups moods by month', function (): void {
     $component = Volt::actingAs($user)->test('your-year');
     $chartData = $component->get('chartData');
 
-    expect($chartData[2])->toMatchArray(['month' => 'Mar', 'positive' => 1, 'negative' => 0]);
-    expect($chartData[6])->toMatchArray(['month' => 'Jul', 'positive' => 0, 'negative' => 1]);
+    expect($chartData[2])->toMatchArray(['month' => 'Mar', 'pleasant' => 1, 'unpleasant' => 0]);
+    expect($chartData[6])->toMatchArray(['month' => 'Jul', 'pleasant' => 0, 'unpleasant' => 1]);
 });
 
 test('chart data only includes current year moods', function (): void {
@@ -113,11 +113,11 @@ test('chart data only includes current year moods', function (): void {
     $component = Volt::actingAs($user)->test('your-year');
     $chartData = $component->get('chartData');
 
-    $totalPositive = collect($chartData)->sum('positive');
-    $totalNegative = collect($chartData)->sum('negative');
+    $totalPleasant = collect($chartData)->sum('pleasant');
+    $totalUnpleasant = collect($chartData)->sum('unpleasant');
 
-    expect($totalPositive)->toBe(1);
-    expect($totalNegative)->toBe(0);
+    expect($totalPleasant)->toBe(1);
+    expect($totalUnpleasant)->toBe(0);
 });
 
 test('chart data only includes authenticated user moods', function (): void {
@@ -137,11 +137,11 @@ test('chart data only includes authenticated user moods', function (): void {
     $component = Volt::actingAs($user)->test('your-year');
     $chartData = $component->get('chartData');
 
-    $totalPositive = collect($chartData)->sum('positive');
-    $totalNegative = collect($chartData)->sum('negative');
+    $totalPleasant = collect($chartData)->sum('pleasant');
+    $totalUnpleasant = collect($chartData)->sum('unpleasant');
 
-    expect($totalPositive)->toBe(1);
-    expect($totalNegative)->toBe(0);
+    expect($totalPleasant)->toBe(1);
+    expect($totalUnpleasant)->toBe(0);
 });
 
 test('month selector displays all 12 months', function (): void {
@@ -191,7 +191,7 @@ test('selecting a month shows daily data for that month', function (): void {
     $chartData = $component->get('chartData');
 
     expect($chartData)->toHaveCount(31);
-    expect($chartData[0])->toHaveKeys(['day', 'positive', 'negative']);
+    expect($chartData[0])->toHaveKeys(['day', 'pleasant', 'unpleasant']);
     expect($chartData[0]['day'])->toBe('1');
     expect($chartData[30]['day'])->toBe('31');
 });
@@ -228,8 +228,8 @@ test('daily chart data counts moods correctly', function (): void {
 
     $chartData = $component->get('chartData');
 
-    expect($chartData[14])->toMatchArray(['day' => '15', 'positive' => 2, 'negative' => 0]);
-    expect($chartData[19])->toMatchArray(['day' => '20', 'positive' => 0, 'negative' => 1]);
+    expect($chartData[14])->toMatchArray(['day' => '15', 'pleasant' => 2, 'unpleasant' => 0]);
+    expect($chartData[19])->toMatchArray(['day' => '20', 'pleasant' => 0, 'unpleasant' => 1]);
 });
 
 test('daily chart data only includes moods from selected month', function (): void {
@@ -251,11 +251,11 @@ test('daily chart data only includes moods from selected month', function (): vo
 
     $chartData = $component->get('chartData');
 
-    $totalPositive = collect($chartData)->sum('positive');
-    $totalNegative = collect($chartData)->sum('negative');
+    $totalPleasant = collect($chartData)->sum('pleasant');
+    $totalUnpleasant = collect($chartData)->sum('unpleasant');
 
-    expect($totalPositive)->toBe(1);
-    expect($totalNegative)->toBe(0);
+    expect($totalPleasant)->toBe(1);
+    expect($totalUnpleasant)->toBe(0);
 });
 
 test('clearing month selection returns to yearly view', function (): void {
@@ -269,6 +269,6 @@ test('clearing month selection returns to yearly view', function (): void {
     $chartData = $component->get('chartData');
 
     expect($chartData)->toHaveCount(12);
-    expect($chartData[0])->toHaveKeys(['month', 'positive', 'negative']);
+    expect($chartData[0])->toHaveKeys(['month', 'pleasant', 'unpleasant']);
     expect($component->get('xAxisField'))->toBe('month');
 });

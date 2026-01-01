@@ -46,12 +46,12 @@ enum MoodType: string
             self::Joyful,
             self::Peaceful,
             self::Productive,
-            self::Stimulating => 'positive',
+            self::Stimulating => 'pleasant',
             self::Complicated,
             self::Disappointing,
             self::Frustrating,
             self::Sad,
-            self::Stressful => 'negative',
+            self::Stressful => 'unpleasant',
         };
     }
 }

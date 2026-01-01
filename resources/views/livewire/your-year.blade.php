@@ -9,7 +9,7 @@ new class() extends Component
     public ?int $selectedMonth = null;
 
     /**
-     * @return array<int, array{month: string, positive: int, negative: int}|array{day: string, positive: int, negative: int}>
+     * @return array<int, array{month: string, pleasant: int, unpleasant: int}|array{day: string, pleasant: int, unpleasant: int}>
      */
     #[Computed]
     public function chartData(): array
@@ -28,26 +28,26 @@ new class() extends Component
     }
 
     #[Computed]
-    public function hasPositiveData(): bool
+    public function hasPleasantData(): bool
     {
-        return collect($this->chartData)->sum('positive') > 0;
+        return collect($this->chartData)->sum('pleasant') > 0;
     }
 
     #[Computed]
-    public function hasNegativeData(): bool
+    public function hasUnpleasantData(): bool
     {
-        return collect($this->chartData)->sum('negative') > 0;
+        return collect($this->chartData)->sum('unpleasant') > 0;
     }
 
     /**
-     * @return array<int, array{month: string, positive: int, negative: int}>
+     * @return array<int, array{month: string, pleasant: int, unpleasant: int}>
      */
     private function getMonthlyChartData(): array
     {
         $months = [];
 
         foreach (range(1, 12) as $month) {
-            $months[$month] = ['positive' => 0, 'negative' => 0];
+            $months[$month] = ['pleasant' => 0, 'unpleasant' => 0];
         }
 
         $moods = Auth::user()
@@ -66,13 +66,13 @@ new class() extends Component
 
         return collect($months)->map(fn (array $counts, int $month): array => [
             'month' => now()->setMonth($month)->format('M'),
-            'positive' => $counts['positive'],
-            'negative' => $counts['negative'],
+            'pleasant' => $counts['pleasant'],
+            'unpleasant' => $counts['unpleasant'],
         ])->values()->all();
     }
 
     /**
-     * @return array<int, array{day: string, positive: int, negative: int}>
+     * @return array<int, array{day: string, pleasant: int, unpleasant: int}>
      */
     private function getDailyChartData(): array
     {
@@ -82,7 +82,7 @@ new class() extends Component
         $days = [];
 
         foreach (range(1, $daysInMonth) as $day) {
-            $days[$day] = ['positive' => 0, 'negative' => 0];
+            $days[$day] = ['pleasant' => 0, 'unpleasant' => 0];
         }
 
         $moods = Auth::user()
@@ -102,14 +102,14 @@ new class() extends Component
 
         return collect($days)->map(fn (array $counts, int $day): array => [
             'day' => (string) $day,
-            'positive' => $counts['positive'],
-            'negative' => $counts['negative'],
+            'pleasant' => $counts['pleasant'],
+            'unpleasant' => $counts['unpleasant'],
         ])->values()->all();
     }
 };
 
 ?>
-pest
+
 <div>
     <flux:card class="space-y-6">
         <div class="flex justify-between">
@@ -119,7 +119,7 @@ pest
                 </flux:heading>
 
                 <flux:text>
-                    {{ __('They are divided between positive and negative moods') }}
+                    {{ __('They are divided between pleasant and unpleasant moods') }}
                 </flux:text>
             </div>
 
@@ -137,14 +137,14 @@ pest
         <flux:chart wire:key="chart-{{ $selectedMonth ?? 'year' }}" :value="$this->chartData">
             <flux:chart.viewport class="aspect-3/1">
                 <flux:chart.svg>
-                    @if ($this->hasPositiveData)
-                        <flux:chart.line field="positive" class="text-sky-500 dark:text-sky-400" />
-                        <flux:chart.point field="positive" class="text-sky-500 dark:text-sky-400" />
+                    @if ($this->hasPleasantData)
+                        <flux:chart.line field="pleasant" class="text-sky-500 dark:text-sky-400" />
+                        <flux:chart.point field="pleasant" class="text-sky-500 dark:text-sky-400" />
                     @endif
 
-                    @if ($this->hasNegativeData)
-                        <flux:chart.line field="negative" class="text-amber-500 dark:text-amber-400" />
-                        <flux:chart.point field="negative" class="text-amber-500 dark:text-amber-400" />
+                    @if ($this->hasUnpleasantData)
+                        <flux:chart.line field="unpleasant" class="text-amber-500 dark:text-amber-400" />
+                        <flux:chart.point field="unpleasant" class="text-amber-500 dark:text-amber-400" />
                     @endif
 
                     <flux:chart.axis axis="x" :field="$this->xAxisField">
@@ -161,22 +161,22 @@ pest
                 <flux:chart.tooltip>
                     <flux:chart.tooltip.heading :field="$this->xAxisField" />
 
-                    @if ($this->hasPositiveData)
-                        <flux:chart.tooltip.value field="positive" label="Positive" />
+                    @if ($this->hasPleasantData)
+                        <flux:chart.tooltip.value field="pleasant" label="Pleasant" />
                     @endif
 
-                    @if ($this->hasNegativeData)
-                        <flux:chart.tooltip.value field="negative" label="Negative" />
+                    @if ($this->hasUnpleasantData)
+                        <flux:chart.tooltip.value field="unpleasant" label="Unpleasant" />
                     @endif
                 </flux:chart.tooltip>
             </flux:chart.viewport>
 
             <div class="flex justify-center gap-4 pt-4">
-                <flux:chart.legend label="Positive">
+                <flux:chart.legend label="Pleasant">
                     <flux:chart.legend.indicator class="bg-sky-500" />
                 </flux:chart.legend>
 
-                <flux:chart.legend label="Negative">
+                <flux:chart.legend label="Unpleasant">
                     <flux:chart.legend.indicator class="bg-amber-500" />
                 </flux:chart.legend>
             </div>

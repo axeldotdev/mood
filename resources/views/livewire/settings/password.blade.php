@@ -5,9 +5,12 @@ use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\ValidationException;
 use Livewire\Volt\Component;
 
-new class extends Component {
+new class() extends Component
+{
     public string $current_password = '';
+
     public string $password = '';
+
     public string $password_confirmation = '';
 
     /**
@@ -57,7 +60,7 @@ new class extends Component {
             />
             <flux:input
                 wire:model="password_confirmation"
-                :label="__('Confirm Password')"
+                :label="__('Confirm password')"
                 type="password"
                 required
                 autocomplete="new-password"

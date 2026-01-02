@@ -368,3 +368,94 @@ test('view mode selector is displayed', function (): void {
         ->assertSee('Categorised')
         ->assertSee('Detailed');
 });
+
+test('yesterday computed property returns correct month and day', function (): void {
+    $user = User::factory()->create();
+    $yesterday = now()->subDay();
+
+    $component = Volt::actingAs($user)->test('your-year');
+
+    expect($component->get('yesterday'))->toBe([
+        'month' => $yesterday->month,
+        'day' => $yesterday->day,
+    ]);
+});
+
+test('yesterdayHasMood returns false when no mood exists for yesterday', function (): void {
+    $user = User::factory()->create();
+
+    $component = Volt::actingAs($user)->test('your-year');
+
+    expect($component->get('yesterdayHasMood'))->toBeFalse();
+});
+
+test('yesterdayHasMood returns true when mood exists for yesterday', function (): void {
+    $user = User::factory()->create();
+    Mood::factory()->for($user)->create(['created_at' => now()->subDay()]);
+
+    $component = Volt::actingAs($user)->test('your-year');
+
+    expect($component->get('yesterdayHasMood'))->toBeTrue();
+});
+
+test('add yesterday mood button is shown when yesterday has no mood', function (): void {
+    $user = User::factory()->create();
+
+    Volt::actingAs($user)
+        ->test('your-year')
+        ->assertSee(__("Add yesterday's mood"));
+});
+
+test('add yesterday mood button is hidden when yesterday has mood', function (): void {
+    $user = User::factory()->create();
+    Mood::factory()->for($user)->create(['created_at' => now()->subDay()]);
+
+    Volt::actingAs($user)
+        ->test('your-year')
+        ->assertDontSee(__("Add yesterday's mood"));
+});
+
+test('today computed property returns correct month and day', function (): void {
+    $user = User::factory()->create();
+
+    $component = Volt::actingAs($user)->test('your-year');
+
+    expect($component->get('today'))->toBe([
+        'month' => now()->month,
+        'day' => now()->day,
+    ]);
+});
+
+test('todayHasMood returns false when no mood exists for today', function (): void {
+    $user = User::factory()->create();
+
+    $component = Volt::actingAs($user)->test('your-year');
+
+    expect($component->get('todayHasMood'))->toBeFalse();
+});
+
+test('todayHasMood returns true when mood exists for today', function (): void {
+    $user = User::factory()->create();
+    Mood::factory()->for($user)->create();
+
+    $component = Volt::actingAs($user)->test('your-year');
+
+    expect($component->get('todayHasMood'))->toBeTrue();
+});
+
+test('add today mood button is shown when today has no mood', function (): void {
+    $user = User::factory()->create();
+
+    Volt::actingAs($user)
+        ->test('your-year')
+        ->assertSee(__("Add today's mood"));
+});
+
+test('add today mood button is hidden when today has mood', function (): void {
+    $user = User::factory()->create();
+    Mood::factory()->for($user)->create();
+
+    Volt::actingAs($user)
+        ->test('your-year')
+        ->assertDontSee(__("Add today's mood"));
+});

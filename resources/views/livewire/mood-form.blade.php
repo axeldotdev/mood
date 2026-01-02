@@ -2,15 +2,23 @@
 
 use App\Enums\MoodType;
 use App\Models\Mood;
+use Carbon\CarbonImmutable;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
 use Livewire\Volt\Component;
 
 new class() extends Component
 {
+    public string $selectedDay;
+
     public array $moods = [];
 
     public ?string $comment = null;
+
+    public function mount(): void
+    {
+        $this->selectedDay ??= today()->toDateString();
+    }
 
     public function updatedMoods(): void
     {
@@ -19,7 +27,7 @@ new class() extends Component
 
     public function save(): void
     {
-        if (auth()->check() && $this->todaysMood) {
+        if (auth()->check() && $this->dayMood) {
             return;
         }
 
@@ -56,9 +64,10 @@ new class() extends Component
         auth()->user()->moods()->create([
             'types' => $this->moods,
             'comment' => $this->comment,
+            'created_at' => CarbonImmutable::parse($this->selectedDay),
         ]);
 
-        unset($this->todaysMood);
+        unset($this->dayMood);
 
         $this->reset(['moods', 'comment']);
 
@@ -66,44 +75,50 @@ new class() extends Component
     }
 
     #[Computed]
-    public function todaysMood(): ?Mood
+    public function dayMood(): ?Mood
     {
         if (auth()->guest()) {
             return null;
         }
 
         return auth()->user()->moods()
-            ->whereDate('created_at', today())
+            ->whereDate('created_at', $this->selectedDay)
             ->first();
+    }
+
+    #[Computed]
+    public function isToday(): bool
+    {
+        return $this->selectedDay === today()->toDateString();
     }
 };
 
 ?>
 
 <div>
-    @if (auth()->check() && $this->todaysMood)
+    @if (auth()->check() && $this->dayMood)
         <flux:heading size="xl" level="1" class="text-center">
-            {{ __("You've already logged your mood today!") }}
+            {{ $this->isToday ? __("You've already logged your mood today!") : __("You've already logged your mood for this day!") }}
         </flux:heading>
 
         <flux:text class="mt-2 mb-6 text-center">
-            {{ __('Come back tomorrow to log how you feel.') }}
+            {{ $this->isToday ? __('Come back tomorrow to log how you feel.') : __('This day already has a mood entry.') }}
         </flux:text>
 
         <div class="flex flex-wrap justify-center gap-2">
-            @foreach ($this->todaysMood->types as $type)
+            @foreach ($this->dayMood->types as $type)
                 <flux:badge size="lg">{{ $type->label() }}</flux:badge>
             @endforeach
         </div>
 
-        @if ($this->todaysMood->comment)
+        @if ($this->dayMood->comment)
             <flux:text class="mt-6 text-center italic max-w-2xl mx-auto">
-                "{{ $this->todaysMood->comment }}"
+                "{{ $this->dayMood->comment }}"
             </flux:text>
         @endif
     @else
         <flux:heading size="xl" level="1" class="text-center">
-            {{ __('What is your mood today?') }}
+            {{ $this->isToday ? __('What is your mood today?') : __('What was your mood yesterday?') }}
         </flux:heading>
 
         <flux:text class="mt-2 mb-6 text-center">
@@ -122,7 +137,7 @@ new class() extends Component
             </div>
 
             <div class="max-w-2xl w-full mx-auto">
-                <flux:textarea wire:model="comment" rows="auto" :placeholder="__('Describe what you felt today and what you want to remember')" />
+                <flux:textarea wire:model="comment" rows="auto" :placeholder="$this->isToday ? __('Describe what you felt today and what you want to remember') : __('Describe what you felt yesterday and what you want to remember')" />
             </div>
 
             <div class="flex justify-center">

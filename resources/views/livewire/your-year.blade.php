@@ -84,6 +84,44 @@ new class() extends Component
     }
 
     /**
+     * @return array{month: int, day: int}
+     */
+    #[Computed]
+    public function yesterday(): array
+    {
+        $yesterday = now()->subDay();
+
+        return [
+            'month' => $yesterday->month,
+            'day' => $yesterday->day,
+        ];
+    }
+
+    #[Computed]
+    public function yesterdayHasMood(): bool
+    {
+        return isset($this->moodsByDate[$this->yesterday['month']][$this->yesterday['day']]);
+    }
+
+    /**
+     * @return array{month: int, day: int}
+     */
+    #[Computed]
+    public function today(): array
+    {
+        return [
+            'month' => now()->month,
+            'day' => now()->day,
+        ];
+    }
+
+    #[Computed]
+    public function todayHasMood(): bool
+    {
+        return isset($this->moodsByDate[$this->today['month']][$this->today['day']]);
+    }
+
+    /**
      * @return array<int, array{month: string, pleasant: int, unpleasant: int}>
      */
     private function getMonthlyChartData(): array
@@ -389,6 +427,22 @@ new class() extends Component
                                             </flux:tooltip>
                                         @endif
                                     </div>
+                                @elseif ($m === $this->yesterday['month'] && $d === $this->yesterday['day'] && !$this->yesterdayHasMood)
+                                    <flux:modal.trigger name="yesterday-mood-form">
+                                        <flux:tooltip :content="__('Add yesterday\'s mood')">
+                                            <flux:button size="xs" variant="filled" icon="pencil-square">
+                                                {{ __('Add') }}
+                                            </flux:button>
+                                        </flux:tooltip>
+                                    </flux:modal.trigger>
+                                @elseif ($m === $this->today['month'] && $d === $this->today['day'] && !$this->todayHasMood)
+                                    <flux:modal.trigger name="today-mood-form">
+                                        <flux:tooltip :content="__('Add today\'s mood')">
+                                            <flux:button size="xs" variant="filled" icon="pencil-square">
+                                                {{ __('Add') }}
+                                            </flux:button>
+                                        </flux:tooltip>
+                                    </flux:modal.trigger>
                                 @endif
                             </flux:table.cell>
                         @endforeach
@@ -397,4 +451,12 @@ new class() extends Component
             </flux:table.rows>
         </flux:table>
     </flux:card>
+
+    <flux:modal name="yesterday-mood-form" class="max-w-5xl!">
+        <livewire:mood-form :selected-day="now()->subDay()->toDateString()" />
+    </flux:modal>
+
+    <flux:modal name="today-mood-form" class="max-w-5xl!">
+        <livewire:mood-form />
+    </flux:modal>
 </div>

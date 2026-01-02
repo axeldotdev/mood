@@ -111,3 +111,48 @@ test('user can save mood on different days', function (): void {
 
     expect($user->moods)->toHaveCount(2);
 });
+
+test('user can save mood for yesterday with selectedDay prop', function (): void {
+    $user = User::factory()->create();
+    $yesterday = now()->subDay()->toDateString();
+
+    Volt::actingAs($user)
+        ->test('mood-form', ['selectedDay' => $yesterday])
+        ->set('moods', ['good', 'peaceful'])
+        ->set('comment', 'I forgot to log yesterday!')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    expect($user->moods)->toHaveCount(1);
+    expect($user->moods->first()->created_at->toDateString())->toBe($yesterday);
+});
+
+test('mood form shows yesterday text when selectedDay is yesterday', function (): void {
+    $user = User::factory()->create();
+    $yesterday = now()->subDay()->toDateString();
+
+    Volt::actingAs($user)
+        ->test('mood-form', ['selectedDay' => $yesterday])
+        ->assertSee(__('What was your mood yesterday?'))
+        ->assertDontSee(__('What is your mood today?'));
+});
+
+test('mood form shows already logged message for specific day', function (): void {
+    $user = User::factory()->create();
+    $yesterday = now()->subDay();
+    Mood::factory()->for($user)->create(['created_at' => $yesterday]);
+
+    Volt::actingAs($user)
+        ->test('mood-form', ['selectedDay' => $yesterday->toDateString()])
+        ->assertSee(__("You've already logged your mood for this day!"))
+        ->assertDontSee(__("You've already logged your mood today!"));
+});
+
+test('selectedDay defaults to today', function (): void {
+    $user = User::factory()->create();
+
+    Volt::actingAs($user)
+        ->test('mood-form')
+        ->assertSet('selectedDay', today()->toDateString())
+        ->assertSee(__('What is your mood today?'));
+});

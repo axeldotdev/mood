@@ -109,7 +109,7 @@ new class() extends Component
         }
 
         return collect($months)->map(fn (array $counts, int $month): array => [
-            'month' => now()->setMonth($month)->format('M'),
+            'month' => now()->setMonth($month)->translatedFormat('M'),
             'pleasant' => $counts['pleasant'],
             'unpleasant' => $counts['unpleasant'],
         ])->values()->all();
@@ -179,7 +179,7 @@ new class() extends Component
 
         return collect($months)->map(function (array $counts, int $month): array {
             return array_merge(
-                ['month' => now()->setMonth($month)->format('M')],
+                ['month' => now()->setMonth($month)->translatedFormat('M')],
                 $counts
             );
         })->values()->all();
@@ -250,10 +250,10 @@ new class() extends Component
                     </flux:select.option>
                 </flux:select>
 
-                <flux:select wire:model.live="selectedMonth" placeholder="{{ __('All year') }}" clearable variant="listbox" size="sm">
+                <flux:select wire:model.live="selectedMonth" :placeholder="__('All year')" clearable variant="listbox" size="sm">
                     @foreach (range(1, 12) as $m)
                         <flux:select.option value="{{ $m }}">
-                            {{ now()->setMonth($m)->format('F') }}
+                            {{ now()->setMonth($m)->translatedFormat('F') }}
                         </flux:select.option>
                     @endforeach
                 </flux:select>
@@ -349,13 +349,13 @@ new class() extends Component
 
         <flux:table container:class="max-h-128">
             <flux:table.columns sticky class="bg-white">
-                <flux:table.column sticky>
+                <flux:table.column sticky class="bg-white">
                     {{ __('Day') }}
                 </flux:table.column>
 
                 @foreach (range(1, 12) as $m)
                     <flux:table.column wire:key="'month-'.$m" :class="now()->month === $m ? 'text-sky-500!' : ''">
-                        {{ now()->setMonth($m)->format('F') }}
+                        {{ now()->setMonth($m)->translatedFormat('F') }}
                     </flux:table.column>
                 @endforeach
             </flux:table.columns>
@@ -363,7 +363,7 @@ new class() extends Component
             <flux:table.rows>
                 @foreach (range(1, 31) as $d)
                     <flux:table.row>
-                        <flux:table.cell sticky class="bg-white">
+                        <flux:table.cell sticky @class(['font-medium bg-white', 'text-sky-500!' => now()->day === $d])>
                             {{ $d }}
                         </flux:table.cell>
 

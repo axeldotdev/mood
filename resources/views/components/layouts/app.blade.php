@@ -3,7 +3,7 @@
     <head>
         @include('partials.head')
     </head>
-    <body class="min-h-screen bg-white dark:bg-zinc-800 font-mono antialiased">
+    <body class="min-h-screen bg-zinc-50 dark:bg-zinc-800 font-mono antialiased">
         <flux:header container>
             @auth
                 <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
@@ -32,23 +32,23 @@
                     <flux:profile
                         class="cursor-pointer"
                         :initials="auth()->user()->initials()"
+                        avatar:color="sky"
                     />
 
                     <flux:menu>
                         <flux:menu.radio.group>
                             <div class="p-0 text-sm font-normal">
                                 <div class="flex items-center gap-2 px-1 py-1.5 text-start text-sm">
-                                    <span class="relative flex h-8 w-8 shrink-0 overflow-hidden rounded-lg">
-                                        <span
-                                            class="flex h-full w-full items-center justify-center rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white"
-                                        >
-                                            {{ auth()->user()->initials() }}
-                                        </span>
-                                    </span>
+                                    <flux:avatar :initials="auth()->user()->initials()" color="sky" />
 
                                     <div class="grid flex-1 text-start text-sm leading-tight">
-                                        <span class="truncate font-semibold">{{ auth()->user()->name }}</span>
-                                        <span class="truncate text-xs">{{ auth()->user()->email }}</span>
+                                        <flux:text variant="strong" class="truncate font-semibold">
+                                            {{ auth()->user()->name }}
+                                        </flux:text>
+
+                                        <flux:text size="sm" class="truncate">
+                                            {{ auth()->user()->email }}
+                                        </flux:text>
                                     </div>
                                 </div>
                             </div>
@@ -100,15 +100,13 @@
                 </a>
 
                 <flux:navlist variant="outline">
-                    <flux:navlist.group :heading="__('Platform')">
-                        <flux:navlist.item icon="calendar" :href="route('dashboard')" wire:navigate>
-                            {{ __('Today') }}
-                        </flux:navlist.item>
+                    <flux:navlist.item icon="calendar" :href="route('dashboard')" wire:navigate>
+                        {{ __('Today') }}
+                    </flux:navlist.item>
 
-                        <flux:navlist.item icon="calendar-days" :href="route('your-year')" wire:navigate>
-                            {{ __('Your year') }}
-                        </flux:navlist.item>
-                    </flux:navlist.group>
+                    <flux:navlist.item icon="calendar-days" :href="route('your-year')" wire:navigate>
+                        {{ __('Your year') }}
+                    </flux:navlist.item>
                 </flux:navlist>
             </flux:sidebar>
         @endauth

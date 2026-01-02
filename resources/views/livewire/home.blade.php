@@ -1,6 +1,6 @@
 <div>
     <header class="py-16 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-6">
-        <div class="">
+        <div class="max-w-2xl">
             <flux:heading size="6xl" level="1">
                 {{ __('How are you feeling today?') }}
             </flux:heading>
@@ -18,8 +18,8 @@
             </div>
         </div>
 
-        <div class="content-center">
-            <div class="flex flex-wrap justify-center items-center gap-2">
+        <div class="lg:content-center">
+            <div class="max-w-xl flex flex-wrap lg:justify-center lg:items-center gap-2">
                 @foreach (\App\Enums\MoodType::cases() as $mood)
                     <flux:badge :color="$mood->badgeColor()">
                         {{ $mood->label() }}

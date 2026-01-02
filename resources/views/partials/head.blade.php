@@ -2,6 +2,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
+<script>
+    if (!document.cookie.includes('timezone=')) {
+        document.cookie = 'timezone=' + Intl.DateTimeFormat().resolvedOptions().timeZone + ';path=/;max-age=31536000;SameSite=Lax';
+    }
+</script>
+
 <title>{{ $title ?? config('app.name') }}</title>
 <meta name="description" content="{{ $description ?? '' }}">
 <link rel="canonical" href="{{ $canonical ?? url()->current() }}"/>

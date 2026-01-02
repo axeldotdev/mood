@@ -139,10 +139,24 @@ new class() extends Component
         @endforeach
 
         <flux:card size="sm">
-            <form wire:submit="save" class="flex items-center gap-2 w-full">
-                <flux:input wire:model="name" :placeholder="__('Name')" size="sm"/>
-                <flux:input wire:model="description" :placeholder="__('Description')" size="sm"/>
-                <flux:button type="submit" size="sm" variant="primary" icon="plus" :tooltip="__('Add')" />
+            <form wire:submit="save" class="w-full">
+                <div class="hidden md:flex gap-2 w-full">
+                    <flux:input wire:model="name" :placeholder="__('Name')" size="sm"/>
+
+                    <flux:input wire:model="description" :placeholder="__('Description')" size="sm"/>
+
+                    <flux:button type="submit" size="sm" variant="primary" icon="plus" :tooltip="__('Save your goal')" />
+                </div>
+
+                <div class="flex md:hidden flex-col gap-2 w-full">
+                    <flux:input wire:model="name" :placeholder="__('Name')"/>
+
+                    <flux:input wire:model="description" :placeholder="__('Description')"/>
+
+                    <flux:button type="submit" variant="primary" class="w-full">
+                        {{ __('Save your goal') }}
+                    </flux:button>
+                </div>
             </form>
         </flux:card>
     </div>

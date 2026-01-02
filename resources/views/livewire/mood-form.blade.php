@@ -98,7 +98,7 @@ new class() extends Component
 <div>
     @if (auth()->check() && $this->dayMood)
         <div>
-            <flux:heading>
+            <flux:heading size="lg">
                 {{ $this->isToday ? __("You've already logged your mood today!") : __("You've already logged your mood for this day!") }}
             </flux:heading>
 
@@ -120,7 +120,7 @@ new class() extends Component
         @endif
     @else
         <div>
-            <flux:heading>
+            <flux:heading size="lg">
                 {{ $this->isToday ? __('What is your mood today?') : __('What was your mood yesterday?') }}
             </flux:heading>
 

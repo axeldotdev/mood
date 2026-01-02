@@ -268,7 +268,7 @@ new class() extends Component
     <flux:card class="space-y-6">
         <div class="flex flex-col lg:flex-row lg:justify-between gap-4">
             <div>
-                <flux:heading>
+                <flux:heading size="lg">
                     {{ __('Mood Trends') }}
                 </flux:heading>
 
@@ -376,7 +376,7 @@ new class() extends Component
 
     <flux:card class="space-y-6">
         <div>
-            <flux:heading>
+            <flux:heading size="lg">
                 {{ __('Mood Calendar') }}
             </flux:heading>
 

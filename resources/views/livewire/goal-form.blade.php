@@ -84,7 +84,7 @@ new class() extends Component
 
 <div>
     <div>
-        <flux:heading>
+        <flux:heading size="lg">
             {{ __('Build your path') }}
         </flux:heading>
 

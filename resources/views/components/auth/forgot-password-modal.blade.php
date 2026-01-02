@@ -1,7 +1,7 @@
 <flux:modal name="forgot-password-modal" class="md:w-96">
     <div class="space-y-6">
         <div>
-            <flux:heading size="lg">{{ __('Forgot password') }}</flux:heading>
+            <flux:heading size="lg">{{ __('Forgot your password?') }}</flux:heading>
             <flux:text class="mt-2">{{ __('Enter your email to receive a password reset link') }}</flux:text>
         </div>
 
@@ -26,9 +26,12 @@
         </form>
 
         <div class="space-x-1 rtl:space-x-reverse text-center text-sm text-zinc-600 dark:text-zinc-400">
-            <span>{{ __('Or, return to') }}</span>
+            <span>
+                {{ __('Or, return to') }}
+            </span>
+
             <flux:link href="#" x-on:click.prevent="$flux.modal('forgot-password-modal').close(); $flux.modal('login-form').show()" data-test="forgot-password-switch-to-login">
-                {{ __('log in') }}
+                {{ __('Log in') }}
             </flux:link>
         </div>
     </div>

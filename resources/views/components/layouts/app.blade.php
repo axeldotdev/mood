@@ -73,16 +73,18 @@
             @else
                 <div class="flex gap-2">
                     <flux:modal.trigger name="login-form">
-                        <flux:button variant="ghost">
+                        <flux:button>
                             {{ __('Sign in') }}
                         </flux:button>
                     </flux:modal.trigger>
 
-                    <flux:modal.trigger name="register-form">
-                        <flux:button variant="primary">
-                            {{ __('Sign up') }}
-                        </flux:button>
-                    </flux:modal.trigger>
+                    <div class="hidden sm:flex">
+                        <flux:modal.trigger name="register-form">
+                            <flux:button variant="primary">
+                                {{ __('Sign up') }}
+                            </flux:button>
+                        </flux:modal.trigger>
+                    </div>
                 </div>
 
                 <livewire:auth.login-modal />

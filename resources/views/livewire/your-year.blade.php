@@ -266,7 +266,7 @@ new class() extends Component
 
 <div class="space-y-6">
     <flux:card class="space-y-6">
-        <div class="flex justify-between">
+        <div class="flex flex-col lg:flex-row lg:justify-between gap-4">
             <div>
                 <flux:heading>
                     {{ __('Mood Trends') }}
@@ -299,7 +299,7 @@ new class() extends Component
         </div>
 
         <flux:chart wire:key="chart-{{ $viewMode }}-{{ $selectedMonth ?? 'year' }}" :value="$this->chartData">
-            <flux:chart.viewport class="aspect-3/1">
+            <flux:chart.viewport class="aspect-2/1 md:aspect-3/1">
                 <flux:chart.svg>
                     @if ($viewMode === 'categorised')
                         @if ($this->hasPleasantData)
@@ -413,18 +413,24 @@ new class() extends Component
                                             <flux:tooltip :content="$type->label()">
                                                 <flux:badge size="sm" :color="$type->badgeColor()">
                                                     {{ $type->emoji() }}
+
+                                                    <span class="md:hidden">
+                                                        {{ $type->name() }}
+                                                    </span>
                                                 </flux:badge>
                                             </flux:tooltip>
                                         @endforeach
 
                                         @if ($this->moodsByDate[$m][$d]['comment'])
-                                            <flux:tooltip :content="$this->moodsByDate[$m][$d]['comment']">
-                                                <flux:badge size="sm">
-                                                    <x-slot name="icon">
-                                                        <flux:icon.chat-bubble-bottom-center-text variant="micro"/>
-                                                    </x-slot>
-                                                </flux:badge>
-                                            </flux:tooltip>
+                                            <div class="hidden md:flex">
+                                                <flux:tooltip :content="$this->moodsByDate[$m][$d]['comment']">
+                                                    <flux:badge size="sm">
+                                                        <x-slot name="icon">
+                                                            <flux:icon.chat-bubble-bottom-center-text variant="micro"/>
+                                                        </x-slot>
+                                                    </flux:badge>
+                                                </flux:tooltip>
+                                            </div>
                                         @endif
                                     </div>
                                 @elseif ($m === $this->yesterday['month'] && $d === $this->yesterday['day'] && !$this->yesterdayHasMood)

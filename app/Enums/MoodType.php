@@ -77,9 +77,14 @@ enum MoodType: string
         };
     }
 
+    public function name(): string
+    {
+        return __(ucfirst($this->value));
+    }
+
     public function label(): string
     {
-        return $this->emoji() . ' ' . __(ucfirst($this->value));
+        return $this->emoji() . ' ' . $this->name();
     }
 
     public function category(): string

@@ -97,32 +97,34 @@ new class() extends Component
 
 <div>
     @if (auth()->check() && $this->dayMood)
-        <flux:heading size="xl" level="1" class="text-center">
-            {{ $this->isToday ? __("You've already logged your mood today!") : __("You've already logged your mood for this day!") }}
-        </flux:heading>
+        <div>
+            <flux:heading>
+                {{ $this->isToday ? __("You've already logged your mood today!") : __("You've already logged your mood for this day!") }}
+            </flux:heading>
 
-        <flux:text class="mt-2 mb-6 text-center">
-            {{ $this->isToday ? __('Come back tomorrow to log how you feel.') : __('This day already has a mood entry.') }}
-        </flux:text>
+            <flux:text>
+                {{ $this->isToday ? __('Come back tomorrow to log how you feel.') : __('This day already has a mood entry.') }}
+            </flux:text>
+        </div>
 
-        <div class="flex flex-wrap justify-center gap-2">
+        <div class="flex gap-2 mt-6">
             @foreach ($this->dayMood->types as $type)
-                <flux:badge size="lg">{{ $type->label() }}</flux:badge>
+                <flux:badge :color="$type->badgeColor()">{{ $type->label() }}</flux:badge>
             @endforeach
         </div>
 
         @if ($this->dayMood->comment)
-            <flux:text class="mt-6 text-center italic max-w-2xl mx-auto">
+            <flux:text class="mt-4 italic max-w-2xl">
                 "{{ $this->dayMood->comment }}"
             </flux:text>
         @endif
     @else
         <div>
-            <flux:heading size="lg">
+            <flux:heading>
                 {{ $this->isToday ? __('What is your mood today?') : __('What was your mood yesterday?') }}
             </flux:heading>
 
-            <flux:text class="mt-2">
+            <flux:text>
                 {{ __('Select one or two adjective and save it') }}
             </flux:text>
         </div>

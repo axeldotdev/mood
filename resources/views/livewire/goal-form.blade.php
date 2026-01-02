@@ -84,16 +84,16 @@ new class() extends Component
 
 <div>
     <div>
-        <flux:heading size="lg">
+        <flux:heading>
             {{ __('Build your path') }}
         </flux:heading>
 
-        <flux:text class="mt-2">
+        <flux:text>
             {{ __('Track what you\'re working toward. See the connection between progress and wellbeing.') }}
         </flux:text>
     </div>
 
-    <div class="max-w-3xl mt-6 space-y-6">
+    <div class="max-w-3xl mt-6 space-y-4">
         @foreach ($this->goals as $goal)
             <flux:card size="sm" class="flex justify-between items-center gap-2" :key="'goal-'.$goal->id">
                 <div class="flex items-center gap-6">

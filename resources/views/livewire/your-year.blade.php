@@ -299,7 +299,7 @@ new class() extends Component
         </div>
 
         <flux:chart wire:key="chart-{{ $viewMode }}-{{ $selectedMonth ?? 'year' }}" :value="$this->chartData">
-            <flux:chart.viewport class="aspect-2/1 md:aspect-3/1">
+            <flux:chart.viewport class="aspect-square sm:aspect-2/1 md:aspect-3/1">
                 <flux:chart.svg>
                     @if ($viewMode === 'categorised')
                         @if ($this->hasPleasantData)

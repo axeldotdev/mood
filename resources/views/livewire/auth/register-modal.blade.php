@@ -44,7 +44,7 @@ new class() extends Component
 
 ?>
 
-<flux:modal name="register-modal" class="md:w-96">
+<flux:modal name="register-form" class="mx-4 sm:mx-auto">
     <div class="space-y-6">
         <div>
             <flux:heading size="lg">{{ __('Create an account') }}</flux:heading>
@@ -103,7 +103,7 @@ new class() extends Component
 
         <div class="space-x-1 rtl:space-x-reverse text-center text-sm text-zinc-600 dark:text-zinc-400">
             <span>{{ __('Already have an account?') }}</span>
-            <flux:link href="#" x-on:click.prevent="$flux.modal('register-modal').close(); $flux.modal('login-modal').show()" data-test="switch-to-login">
+            <flux:link href="#" x-on:click.prevent="$flux.modal('register-form').close(); $flux.modal('login-form').show()" data-test="switch-to-login">
                 {{ __('Log in') }}
             </flux:link>
         </div>

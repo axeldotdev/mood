@@ -15,7 +15,7 @@ $classes = Flux::classes()
     })
     ->add(match ($size) {
         '6xl' => 'text-6xl/18 [&:has(+[data-flux-subheading])]:mb-4 [[data-flux-subheading]+&]:mt-4',
-        '4xl' => 'text-4xl [&:has(+[data-flux-subheading])]:mb-2 [[data-flux-subheading]+&]:mt-2',
+        '4xl' => 'text-2xl md:text-4xl [&:has(+[data-flux-subheading])]:mb-2 [[data-flux-subheading]+&]:mt-2',
         'xl' => 'text-2xl [&:has(+[data-flux-subheading])]:mb-2 [[data-flux-subheading]+&]:mt-2',
         'lg' => 'text-base [&:has(+[data-flux-subheading])]:mb-2 [[data-flux-subheading]+&]:mt-2',
         default => 'text-sm [&:has(+[data-flux-subheading])]:mb-2 [[data-flux-subheading]+&]:mt-2',

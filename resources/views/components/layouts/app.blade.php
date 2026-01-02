@@ -72,13 +72,13 @@
                 </flux:dropdown>
             @else
                 <div class="flex gap-2">
-                    <flux:modal.trigger name="login-modal">
+                    <flux:modal.trigger name="login-form">
                         <flux:button variant="ghost">
                             {{ __('Sign in') }}
                         </flux:button>
                     </flux:modal.trigger>
 
-                    <flux:modal.trigger name="register-modal">
+                    <flux:modal.trigger name="register-form">
                         <flux:button variant="primary">
                             {{ __('Sign up') }}
                         </flux:button>

@@ -65,11 +65,16 @@ new class() extends Component
 
 ?>
 
-<flux:modal name="login-modal" class="md:w-96">
+<flux:modal name="login-form" class="mx-4 sm:mx-auto">
     <div class="space-y-6">
         <div>
-            <flux:heading size="lg">{{ __('Log in to your account') }}</flux:heading>
-            <flux:text class="mt-2">{{ __('Enter your email and password below to log in') }}</flux:text>
+            <flux:heading size="lg">
+                {{ __('Log in to your account') }}
+            </flux:heading>
+
+            <flux:text class="mt-2">
+                {{ __('Enter your email and password below to log in') }}
+            </flux:text>
         </div>
 
         <form wire:submit="login" class="flex flex-col gap-6">
@@ -95,7 +100,7 @@ new class() extends Component
                 />
 
                 @if (Route::has('password.request'))
-                    <flux:link class="absolute top-0 text-sm end-0" href="#" x-on:click.prevent="$flux.modal('login-modal').close(); $flux.modal('forgot-password-modal').show()" data-test="switch-to-forgot-password">
+                    <flux:link class="absolute top-0 text-sm end-0" href="#" x-on:click.prevent="$flux.modal('login-form').close(); $flux.modal('forgot-password-modal').show()" data-test="switch-to-forgot-password">
                         {{ __('Forgot your password?') }}
                     </flux:link>
                 @endif
@@ -112,7 +117,7 @@ new class() extends Component
         @if (Route::has('register'))
             <div class="space-x-1 text-sm text-center rtl:space-x-reverse text-zinc-600 dark:text-zinc-400">
                 <span>{{ __("Don't have an account?") }}</span>
-                <flux:link href="#" x-on:click.prevent="$flux.modal('login-modal').close(); $flux.modal('register-modal').show()" data-test="switch-to-register">
+                <flux:link href="#" x-on:click.prevent="$flux.modal('login-form').close(); $flux.modal('register-form').show()" data-test="switch-to-register">
                     {{ __('Sign up') }}
                 </flux:link>
             </div>

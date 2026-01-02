@@ -27,7 +27,7 @@
 
         <div class="space-x-1 rtl:space-x-reverse text-center text-sm text-zinc-600 dark:text-zinc-400">
             <span>{{ __('Or, return to') }}</span>
-            <flux:link href="#" x-on:click.prevent="$flux.modal('forgot-password-modal').close(); $flux.modal('login-modal').show()" data-test="forgot-password-switch-to-login">
+            <flux:link href="#" x-on:click.prevent="$flux.modal('forgot-password-modal').close(); $flux.modal('login-form').show()" data-test="forgot-password-switch-to-login">
                 {{ __('log in') }}
             </flux:link>
         </div>
